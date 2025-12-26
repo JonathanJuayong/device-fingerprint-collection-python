@@ -156,6 +156,21 @@ def collect_data():
 
 
 def write_to_csv(device_info, file_path):
+    """
+    Writes device information to a CSV file. This function accepts a dictionary containing
+    device information and a file path to write the data.
+
+    :param device_info: A dictionary containing device information.
+    :type device_info: Dict[str, Any]
+    :param file_path: The file path of the CSV file where data will be written. If the file
+        does not exist, it will be created.
+    :type file_path: str
+    :return: None
+    :raises DuplicateDataException: If a device with the same `mac_address` already exists
+        in the specified file.
+    :raises PermissionError: If there are insufficient permissions to read or write the file.
+    :raises Exception: For any unexpected errors that may occur during file operations.
+    """
     file = Path(file_path)
     file.touch(exist_ok=True)
 
@@ -201,7 +216,7 @@ def write_to_csv(device_info, file_path):
 if __name__ == '__main__':
     while True:
         file_path = input("Please enter the csv file path: \n").strip()
-        if file_path:
+        if file_path:  # check if the user has entered an empty string
             device_info = collect_data()
             write_to_csv(device_info, file_path)
             break
