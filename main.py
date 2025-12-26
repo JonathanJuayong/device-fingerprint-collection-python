@@ -6,6 +6,7 @@ import socket
 import datetime
 import speedtest
 
+
 def get_mac_address(interface_name="Ethernet"):
     mac_address = None
     address = psutil.net_if_addrs()
@@ -33,7 +34,6 @@ def get_processor_model(operating_system):
 
 
 def get_active_ports():
-
     active_connections = [connection for connection in psutil.net_connections() if connection.status == 'LISTEN']
     active_ports = {str(active_connection.laddr.port) for active_connection in active_connections}
     return ", ".join(active_ports)
