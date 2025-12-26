@@ -1,3 +1,4 @@
+import multiprocessing
 import platform
 import cpuinfo
 import os
@@ -49,7 +50,7 @@ def get_processor_model(operating_system):
     :raises UnsupportedOperatingSystemException: If the provided operating system
                                                  is not supported.
     """
-    match operating_system:
+    match operating_system.strip():
         case "Windows":
             return cpuinfo.get_cpu_info()["brand_raw"]
         case "Linux":
@@ -214,6 +215,7 @@ def write_to_csv(device_info, file_path):
 
 
 if __name__ == '__main__':
+    multiprocessing.freeze_support()
     while True:
         file_path = input("Please enter the csv file path: \n").strip()
         if file_path:  # check if the user has entered an empty string
