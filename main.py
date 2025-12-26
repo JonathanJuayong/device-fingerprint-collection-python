@@ -159,33 +159,40 @@ def write_to_csv(data, file_path):
     file = Path(file_path)
     file.touch(exist_ok=True)
 
-    with file.open(mode="r+", newline="") as csv_file:
-        field_names = data.keys()
-        csv_reader = csv.DictReader(csv_file)
-        csv_writer = csv.DictWriter(csv_file, fieldnames=field_names)
+    try:
+        with file.open(mode="r+", newline="") as csv_file:
+            field_names = data.keys()
+            csv_reader = csv.DictReader(csv_file)
+            csv_writer = csv.DictWriter(csv_file, fieldnames=field_names)
 
-        if file.stat().st_size > 0:  # if the file is not empty, check for duplicate
-            csv_file.seek(0)  # move the cursor to the beginning of the file
-            mac_address = data["mac_address"]
-            has_duplicate = False
+            if file.stat().st_size > 0:  # if the file is not empty, check for duplicate
+                csv_file.seek(0)  # move the cursor to the beginning of the file
+                mac_address = data["mac_address"]
+                has_duplicate = False
 
-            for row in csv_reader:
-                existing_mac_address = row["mac_address"]
-                if mac_address == existing_mac_address:
-                    has_duplicate = True
-                    break
+                for row in csv_reader:
+                    existing_mac_address = row["mac_address"]
+                    if mac_address == existing_mac_address:
+                        has_duplicate = True
+                        break
 
-            if has_duplicate:
-                raise DuplicateDataException("This machine has already been catalogued")
+                if has_duplicate:
+                    raise DuplicateDataException
+                else:
+                    csv_file.seek(0, 2)
+                    csv_writer.writerow(data)
+
             else:
-                csv_file.seek(0, 2)
+                csv_writer.writeheader()
                 csv_writer.writerow(data)
 
-        else:
-            csv_writer.writeheader()
-            csv_writer.writerow(data)
-
-    print(f"Data successfully written to {file_path}")
+        print(f"Data successfully written to {file_path}")
+    except DuplicateDataException:
+        print("This machine has already been catalogued")
+    except PermissionError:
+        print(f"You do not have the permission to read or write this file: {file_path}")
+    except Exception:
+        print("Writing to CSV file failed due to unexpected reason")
 
 
 if __name__ == '__main__':
