@@ -199,6 +199,11 @@ def write_to_csv(device_info, file_path):
 
 
 if __name__ == '__main__':
-    file_path = input("Please enter the csv file path: \n")
-    device_info = collect_data()
-    write_to_csv(device_info, file_path)
+    while True:
+        file_path = input("Please enter the csv file path: \n").strip()
+        if file_path:
+            device_info = collect_data()
+            write_to_csv(device_info, file_path)
+            break
+        else:
+            print("Invalid file path. Please try again.")
