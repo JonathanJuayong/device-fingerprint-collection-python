@@ -67,21 +67,34 @@ def collect_data():
     """
 
     device_info = {}
+    print("Device data collection starting")
 
+    print("Getting computer name...")
+    device_info["computer_name"] = platform.node()
     operating_system = platform.system()
+    print("Getting operating system...")
     device_info["operating_system"] = operating_system
+    print("Getting processor model...")
     device_info["processor_model"] = get_processor_model(operating_system)
 
+    print("Getting mac address...")
     device_info["mac_address"] = get_mac_address()
 
+    print("Getting computer name...")
     computer_name = socket.gethostname()
     device_info["computer_name"] = computer_name
+    print("Getting ip address...")
     device_info["ip_address"] = socket.gethostbyname(computer_name)
 
+    print("Getting system time...")
     device_info["system_time"] = datetime.datetime.now().strftime("%H:%M:%S")
+    print("Getting all active ports...")
     device_info["active_ports"] = get_active_ports()
 
+    print("Getting internet download and upload speed...")
     device_info["internet_speed"] = get_internet_speed()
+
+    print("Data collection successful!")
     return device_info
 
 
