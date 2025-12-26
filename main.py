@@ -6,6 +6,8 @@ import socket
 import datetime
 import speedtest
 
+from errors import UnsupportedOperatingSystemException, DataCollectionException
+
 
 def get_mac_address(interface_name="Ethernet"):
     mac_address = None
@@ -15,8 +17,10 @@ def get_mac_address(interface_name="Ethernet"):
             for address in addresses_list:
                 if address.family == psutil.AF_LINK:
                     mac_address = address.address
-
-    return mac_address
+    if mac_address is None:
+        raise DataCollectionException(f"MAC address of {interface_name} not found.")
+    else:
+        return mac_address
 
 
 def get_processor_model(operating_system):
@@ -30,7 +34,7 @@ def get_processor_model(operating_system):
             processor_name_as_string = " ".join(processor_name_as_list)
             return processor_name_as_string
         case _:
-            raise Exception("Unsupported operating system")
+            raise UnsupportedOperatingSystemException("This program only supports Windows and Linux")
 
 
 def get_active_ports():
