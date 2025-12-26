@@ -34,9 +34,10 @@ def get_processor_model(operating_system):
 
 def get_active_ports():
     connections = psutil.net_connections()
-    active_connections = filter(lambda conn: conn.status == "LISTEN", connections)
-    active_ports = map(lambda conn: str(conn.laddr.port), active_connections)
-    return ", ".join(set(active_ports))
+
+    active_connections = [connection for connection in psutil.net_connections() if connection.status == 'LISTEN']
+    active_ports = {str(active_connection.laddr.port) for active_connection in active_connections}
+    return ", ".join(active_ports)
 
 
 def get_internet_speed():
