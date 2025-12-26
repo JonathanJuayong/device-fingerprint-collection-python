@@ -6,7 +6,7 @@ import socket
 import datetime
 import speedtest
 
-from errors import UnsupportedOperatingSystemException, DataCollectionException
+from exeptions import UnsupportedOperatingSystemException, DataCollectionException
 
 
 def get_mac_address(interface_name="Ethernet"):
