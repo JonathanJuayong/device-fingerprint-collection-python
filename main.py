@@ -5,8 +5,9 @@ import psutil
 import socket
 import datetime
 import speedtest
-
-from exeptions import UnsupportedOperatingSystemException, DataCollectionException
+import csv
+from pathlib import Path
+from exeptions import UnsupportedOperatingSystemException, DataCollectionException, DuplicateDataException
 
 
 def get_mac_address(interface_name="Ethernet"):
@@ -84,7 +85,7 @@ def get_internet_speed():
     st = speedtest.Speedtest(secure=True)
     st.get_best_server()
 
-    download_speed = st.download() / 1_000_000 # convert to mbps
+    download_speed = st.download() / 1_000_000  # convert to mbps
     upload_speed = st.upload() / 1_000_000
 
     return f"download: {download_speed:.2f} Mb/s, upload: {upload_speed:.2f} Mb/s"
@@ -152,6 +153,39 @@ def collect_data():
     except Exception as e:
         print(e)
         print("Program failed due to unexpected error.")
+
+
+def write_to_csv(data, file_path):
+    file = Path(file_path)
+    file.touch(exist_ok=True)
+
+    with file.open(mode="r+", newline="") as csv_file:
+        field_names = data.keys()
+        csv_reader = csv.DictReader(csv_file)
+        csv_writer = csv.DictWriter(csv_file, fieldnames=field_names)
+
+        if file.stat().st_size > 0:  # if the file is not empty, check for duplicate
+            csv_file.seek(0)  # move the cursor to the beginning of the file
+            mac_address = data["mac_address"]
+            has_duplicate = False
+
+            for row in csv_reader:
+                existing_mac_address = row["mac_address"]
+                if mac_address == existing_mac_address:
+                    has_duplicate = True
+                    break
+
+            if has_duplicate:
+                raise DuplicateDataException("This machine has already been catalogued")
+            else:
+                csv_file.seek(0, 2)
+                csv_writer.writerow(data)
+
+        else:
+            csv_writer.writeheader()
+            csv_writer.writerow(data)
+
+    print(f"Data successfully written to {file_path}")
 
 
 if __name__ == '__main__':
