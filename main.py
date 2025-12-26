@@ -160,6 +160,7 @@ def write_to_csv(device_info, file_path):
     file.touch(exist_ok=True)
 
     try:
+        print("Preparing to write to file path...")
         with file.open(mode="r+", newline="") as csv_file:
             field_names = device_info.keys()
             csv_reader = csv.DictReader(csv_file)
@@ -188,11 +189,13 @@ def write_to_csv(device_info, file_path):
 
         print(f"Data successfully written to {file_path}")
     except DuplicateDataException:
-        print("This machine has already been catalogued")
+        print(f"Error: Writing to {file_path} failed")
+        print("Reason: This machine has already been catalogued")
     except PermissionError:
-        print(f"You do not have the permission to read or write this file: {file_path}")
-    except Exception:
-        print("Writing to CSV file failed due to unexpected reason")
+        print(f"Error: Writing to {file_path} failed")
+        print(f"Reason: You do not have the permission to read or write this file: {file_path}")
+    except Exception as e:
+        print(f"Writing to CSV file failed due to unexpected reason: {e}")
 
 
 if __name__ == '__main__':
