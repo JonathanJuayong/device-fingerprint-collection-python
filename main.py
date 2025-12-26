@@ -10,8 +10,22 @@ from errors import UnsupportedOperatingSystemException, DataCollectionException
 
 
 def get_mac_address(interface_name="Ethernet"):
+    """
+    Gets the MAC address of a specified network interface.
+
+    :param interface_name: The name of the network interface for which to
+        retrieve the MAC address. Defaults to "Ethernet".
+    :type interface_name: str
+    :return: The MAC address of the specified network interface.
+    :rtype: str
+    :raises DataCollectionException: If the MAC address of the specified
+        network interface is not found.
+    """
     mac_address = None
     address = psutil.net_if_addrs()
+
+    # Go through each address and look for one with an interface that matches the interface_name param
+    # and family that matches the constant psutil.AF_LINK to get the hardware address
     for interface, addresses_list in address.items():
         if interface == interface_name:
             for address in addresses_list:
@@ -24,6 +38,16 @@ def get_mac_address(interface_name="Ethernet"):
 
 
 def get_processor_model(operating_system):
+    """
+    Determines the processor model based on the operating system.
+
+    :param operating_system: The name of the operating system. Supported values are "Windows" and "Linux".
+    :type operating_system: str
+    :return: The model name of the processor as a string.
+    :rtype: str
+    :raises UnsupportedOperatingSystemException: If the provided operating system
+                                                 is not supported.
+    """
     match operating_system:
         case "Windows":
             return cpuinfo.get_cpu_info()["brand_raw"]
@@ -38,16 +62,29 @@ def get_processor_model(operating_system):
 
 
 def get_active_ports():
+    """
+    Extracts and retrieves a list of active network ports currently in the 'LISTEN' state.
+
+    :return: A comma-separated string containing all active ports currently in the
+        'LISTEN' state.
+    :rtype: str
+    """
     active_connections = [connection for connection in psutil.net_connections() if connection.status == 'LISTEN']
     active_ports = {str(active_connection.laddr.port) for active_connection in active_connections}
     return ", ".join(active_ports)
 
 
 def get_internet_speed():
+    """
+    Determine the download and upload internet speeds by testing against the best available server.
+
+    :return: A string representation of download and upload speeds in Mb/s.
+    :rtype: str
+    """
     st = speedtest.Speedtest(secure=True)
     st.get_best_server()
 
-    download_speed = st.download() / 1_000_000
+    download_speed = st.download() / 1_000_000 # convert to mbps
     upload_speed = st.upload() / 1_000_000
 
     return f"download: {download_speed:.2f} Mb/s, upload: {upload_speed:.2f} Mb/s"
@@ -55,16 +92,24 @@ def get_internet_speed():
 
 def collect_data():
     """
-       This function collects the following information from this device:
-       - computer name
-       - ip address
-       - mac address
-       - processor model
-       - operating System
-       - system time
-       - internet connection speed
-       - active ports
-       and returns a dictionary containing the above information
+    Retrieves the following information:
+    - computer name
+    - operating system
+    - processor model
+    - MAC address
+    - IP address
+    - system time
+    - active ports
+    - internet speed (upload and download)
+    The data is returned as a dictionary.
+
+    :raises UnsupportedOperatingSystemException: If the operating system
+        is neither Linux nor Windows.
+    :raises DataCollectionException: If any data collection step fails.
+    :raises TimeoutError: If the function takes too long to complete its execution.
+    :raises Exception: For any general unexpected errors encountered during execution.
+    :return: A dictionary containing the collected device information.
+    :rtype: dict
     """
     try:
         device_info = {}
