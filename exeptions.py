@@ -3,3 +3,6 @@ class UnsupportedOperatingSystemException(Exception):
 
 class DataCollectionException(Exception):
     pass
+
+class DuplicateDataException(Exception):
+    pass
