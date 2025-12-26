@@ -199,6 +199,6 @@ def write_to_csv(device_info, file_path):
 
 
 if __name__ == '__main__':
-    pass
-    # print(operating_system)
-    # print(platform.node())
+    file_path = input("Please enter the csv file path: \n")
+    device_info = collect_data()
+    write_to_csv(device_info, file_path)
