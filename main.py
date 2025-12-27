@@ -11,7 +11,7 @@ from pathlib import Path
 from exeptions import UnsupportedOperatingSystemException, DataCollectionException, DuplicateDataException
 
 
-def get_mac_address():
+def getMacAddress():
     """
     Gets the MAC address of a network interface.
 
@@ -20,48 +20,48 @@ def get_mac_address():
     :return: The MAC address of the discovered network interface.
     :rtype: str
     """
-    mac_address = None
+    macAddress = None
     address = psutil.net_if_addrs()
     prefixes = ["eth", "en", "wlan", "wl", "l"]  # common network interface prefixes
 
     # Go through each address and look for one with an interface that matches the prefixes
     # and family that matches the constant psutil.AF_LINK to get the hardware address
-    for interface, addresses_list in address.items():
+    for interface, addressesList in address.items():
         if any([prefix in interface.lower() for prefix in prefixes]):
-            for address in addresses_list:
+            for address in addressesList:
                 if address.family == psutil.AF_LINK:
-                    mac_address = address.address
-    if mac_address is None:
+                    macAddress = address.address
+    if macAddress is None:
         raise DataCollectionException("No MAC address found.")
     else:
-        return mac_address
+        return macAddress
 
 
-def get_processor_model(operating_system):
+def getProcessorModel(operatingSystem):
     """
     Determines the processor model based on the operating system.
 
-    :param operating_system: The name of the operating system. Supported values are "Windows" and "Linux".
-    :type operating_system: str
+    :param operatingSystem: The name of the operating system. Supported values are "Windows" and "Linux".
+    :type operatingSystem: str
     :return: The model name of the processor as a string.
     :rtype: str
     :raises UnsupportedOperatingSystemException: If the provided operating system
                                                  is not supported.
     """
-    match operating_system.strip():
+    match operatingSystem.strip():
         case "Windows":
             return cpuinfo.get_cpu_info()["brand_raw"]
         case "Linux":
-            terminal_command = "lscpu | grep 'Model name'"
-            raw_string = os.popen(terminal_command).read()
-            processor_name_as_list = raw_string.strip().split()[2:]
-            processor_name_as_string = " ".join(processor_name_as_list)
-            return processor_name_as_string
+            terminalCommand = "lscpu | grep 'Model name'"
+            rawString = os.popen(terminalCommand).read()
+            processorNamesAsList = rawString.strip().split()[2:]
+            processorNameAsString = " ".join(processorNamesAsList)
+            return processorNameAsString
         case _:
             raise UnsupportedOperatingSystemException
 
 
-def get_active_ports():
+def getActivePorts():
     """
     Extracts and retrieves a list of active network ports currently in the 'LISTEN' state.
 
@@ -69,12 +69,12 @@ def get_active_ports():
         'LISTEN' state.
     :rtype: str
     """
-    active_connections = [connection for connection in psutil.net_connections() if connection.status == 'LISTEN']
-    active_ports = {str(active_connection.laddr.port) for active_connection in active_connections}
-    return ", ".join(active_ports)
+    activeConnections = [connection for connection in psutil.net_connections() if connection.status == 'LISTEN']
+    activePorts = {str(activeConnection.laddr.port) for activeConnection in activeConnections}
+    return ", ".join(activePorts)
 
 
-def get_internet_speed():
+def getInternetSpeed():
     """
     Determine the download and upload internet speeds by testing against the best available server.
 
@@ -84,13 +84,13 @@ def get_internet_speed():
     st = speedtest.Speedtest(secure=True)
     st.get_best_server()
 
-    download_speed = st.download() / 1_000_000  # convert to mbps
-    upload_speed = st.upload() / 1_000_000
+    downloadSpeed = st.download() / 1_000_000  # convert to mbps
+    uploadSpeed = st.upload() / 1_000_000
 
-    return f"download: {download_speed:.2f} Mb/s, upload: {upload_speed:.2f} Mb/s"
+    return f"download: {downloadSpeed:.2f} Mb/s, upload: {uploadSpeed:.2f} Mb/s"
 
 
-def collect_data():
+def collectData():
     """
     Retrieves the following information:
     - computer name
@@ -112,36 +112,36 @@ def collect_data():
     :rtype: dict
     """
     try:
-        device_info = {}
+        deviceInfo = {}
         print("Device data collection starting")
 
         print("Getting computer name...")
-        device_info["computer_name"] = platform.node()
-        operating_system = platform.system()
+        deviceInfo["computer_name"] = platform.node()
+        operatingSystem = platform.system()
         print("Getting operating system...")
-        device_info["operating_system"] = operating_system
+        deviceInfo["operating_system"] = operatingSystem
         print("Getting processor model...")
-        device_info["processor_model"] = get_processor_model(operating_system)
+        deviceInfo["processor_model"] = getProcessorModel(operatingSystem)
 
         print("Getting mac address...")
-        device_info["mac_address"] = get_mac_address()
+        deviceInfo["mac_address"] = getMacAddress()
 
         print("Getting computer name...")
-        computer_name = socket.gethostname()
-        device_info["computer_name"] = computer_name
+        computerName = socket.gethostname()
+        deviceInfo["computer_name"] = computerName
         print("Getting ip address...")
-        device_info["ip_address"] = socket.gethostbyname(computer_name)
+        deviceInfo["ip_address"] = socket.gethostbyname(computerName)
 
         print("Getting system time...")
-        device_info["system_time"] = datetime.datetime.now().strftime("%H:%M:%S")
+        deviceInfo["system_time"] = datetime.datetime.now().strftime("%H:%M:%S")
         print("Getting all active ports...")
-        device_info["active_ports"] = get_active_ports()
+        deviceInfo["active_ports"] = getActivePorts()
 
         print("Getting internet download and upload speed...")
-        device_info["internet_speed"] = get_internet_speed()
+        deviceInfo["internet_speed"] = getInternetSpeed()
 
         print("Data collection successful!")
-        return device_info
+        return deviceInfo
     except UnsupportedOperatingSystemException:
         print("This program only supports Linux and Windows.")
     except DataCollectionException as e:
@@ -154,60 +154,60 @@ def collect_data():
         print("Program failed due to unexpected error.")
 
 
-def write_to_csv(device_info, file_path):
+def writeToCSV(deviceInfo, filePath):
     """
     Writes device information to a CSV file. This function accepts a dictionary containing
     device information and a file path to write the data.
 
-    :param device_info: A dictionary containing device information.
-    :type device_info: Dict[str, Any]
-    :param file_path: The file path of the CSV file where data will be written. If the file
+    :param deviceInfo: A dictionary containing device information.
+    :type deviceInfo: Dict[str, Any]
+    :param filePath: The file path of the CSV file where data will be written. If the file
         does not exist, it will be created.
-    :type file_path: str
+    :type filePath: str
     :return: None
     :raises DuplicateDataException: If a device with the same `mac_address` already exists
         in the specified file.
     :raises PermissionError: If there are insufficient permissions to read or write the file.
     :raises Exception: For any unexpected errors that may occur during file operations.
     """
-    file = Path(file_path)
+    file = Path(filePath)
     file.touch(exist_ok=True)
 
     try:
         print("Preparing to write to file path...")
-        with file.open(mode="r+", newline="") as csv_file:
-            field_names = device_info.keys()
-            csv_reader = csv.DictReader(csv_file)
-            csv_writer = csv.DictWriter(csv_file, fieldnames=field_names)
+        with file.open(mode="r+", newline="") as csvFile:
+            fieldNames = deviceInfo.keys()
+            csvReader = csv.DictReader(csvFile)
+            csvWriter = csv.DictWriter(csvFile, fieldnames=fieldNames)
 
             if file.stat().st_size > 0:  # if the file is not empty, check for duplicate
-                csv_file.seek(0)  # move the cursor to the beginning of the file
-                mac_address = device_info["mac_address"]
-                has_duplicate = False
+                csvFile.seek(0)  # move the cursor to the beginning of the file
+                macAddress = deviceInfo["mac_address"]
+                hasDuplicate = False
 
-                for row in csv_reader:
-                    existing_mac_address = row["mac_address"]
-                    if mac_address == existing_mac_address:
-                        has_duplicate = True
+                for row in csvReader:
+                    existingMacAddress = row["mac_address"]
+                    if macAddress == existingMacAddress:
+                        hasDuplicate = True
                         break
 
-                if has_duplicate:
+                if hasDuplicate:
                     raise DuplicateDataException
                 else:
-                    csv_file.seek(0, 2)
-                    csv_writer.writerow(device_info)
+                    csvFile.seek(0, 2)
+                    csvWriter.writerow(deviceInfo)
 
             else:
-                csv_writer.writeheader()
-                csv_writer.writerow(device_info)
+                csvWriter.writeheader()
+                csvWriter.writerow(deviceInfo)
 
-        print(f"Data successfully written to {file_path}")
+        print(f"Data successfully written to {filePath}")
     except DuplicateDataException:
-        print(f"Error: Writing to {file_path} failed")
+        print(f"Error: Writing to {filePath} failed")
         print("Reason: This machine has already been catalogued")
     except PermissionError:
-        print(f"Error: Writing to {file_path} failed")
-        print(f"Reason: You do not have the permission to read or write this file: {file_path}")
+        print(f"Error: Writing to {filePath} failed")
+        print(f"Reason: You do not have the permission to read or write this file: {filePath}")
     except Exception as e:
         print(f"Writing to CSV file failed due to unexpected reason: {e}")
 
@@ -215,10 +215,10 @@ def write_to_csv(device_info, file_path):
 if __name__ == '__main__':
     multiprocessing.freeze_support()
     while True:
-        file_path = input("Please enter the csv file path: \n").strip()
-        if file_path:  # check if the user has entered an empty string
-            device_info = collect_data()
-            write_to_csv(device_info, file_path)
+        filePath = input("Please enter the csv file path: \n").strip()
+        if filePath:  # check if the user has entered an empty string
+            deviceInfo = collectData()
+            writeToCSV(deviceInfo, filePath)
             break
         else:
             print("Invalid file path. Please try again.")
