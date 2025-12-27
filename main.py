@@ -11,30 +11,28 @@ from pathlib import Path
 from exeptions import UnsupportedOperatingSystemException, DataCollectionException, DuplicateDataException
 
 
-def get_mac_address(interface_name="Ethernet"):
+def get_mac_address():
     """
-    Gets the MAC address of a specified network interface.
+    Gets the MAC address of a network interface.
 
-    :param interface_name: The name of the network interface for which to
-        retrieve the MAC address. Defaults to "Ethernet".
-    :type interface_name: str
-    :return: The MAC address of the specified network interface.
+    :raises DataCollectionException: If no MAC address can be identified for the
+      specified prefixes.
+    :return: The MAC address of the discovered network interface.
     :rtype: str
-    :raises DataCollectionException: If the MAC address of the specified
-        network interface is not found.
     """
     mac_address = None
     address = psutil.net_if_addrs()
+    prefixes = ["eth", "en", "wlan", "wl", "l"]  # common network interface prefixes
 
-    # Go through each address and look for one with an interface that matches the interface_name param
+    # Go through each address and look for one with an interface that matches the prefixes
     # and family that matches the constant psutil.AF_LINK to get the hardware address
     for interface, addresses_list in address.items():
-        if interface == interface_name:
+        if any([prefix in interface.lower() for prefix in prefixes]):
             for address in addresses_list:
                 if address.family == psutil.AF_LINK:
                     mac_address = address.address
     if mac_address is None:
-        raise DataCollectionException(f"MAC address of {interface_name} not found.")
+        raise DataCollectionException("No MAC address found.")
     else:
         return mac_address
 
