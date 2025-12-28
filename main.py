@@ -115,8 +115,6 @@ def collectData():
         deviceInfo = {}
         print("Device data collection starting")
 
-        print("Getting computer name...")
-        deviceInfo["computer_name"] = platform.node()
         operatingSystem = platform.system()
         print("Getting operating system...")
         deviceInfo["operating_system"] = operatingSystem
