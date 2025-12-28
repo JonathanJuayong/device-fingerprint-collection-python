@@ -97,6 +97,27 @@ class ProjectTest(unittest.TestCase):
 
         os.remove(filePath)
 
+    def testWriteToCSVShouldUpdateExistingRecordWithNewData(self):
+        filePath = tempFile("test_file4")
+
+        writeToCSV(mockData(), filePath)
+        writeToCSV(mockData(mac="11-22-33-44-55-66"), filePath)
+
+        expectedMacAddresses = [mockData()["mac_address"], "11-22-33-44-55-66"]
+
+        file = pathlib.Path(filePath)
+
+        with file.open(mode="r") as csvFile:
+            csvReader = csv.DictReader(csvFile)
+            rowCount = list(csvReader)
+            self.assertEqual(2, len(rowCount))
+
+            for index, row in enumerate(csvReader):
+                expectedValue = expectedMacAddresses[index]
+                actualValue = row["mac_address"]
+                self.assertEqual(expectedValue, actualValue)
+
+        os.remove(filePath)
 
 if __name__ == "__main__":
     unittest.main()
