@@ -11,21 +11,38 @@ from utils import mockNicAddresses, mockMacAddress, mockSConns, mockData, tempFi
 
 class ProjectTest(unittest.TestCase):
     def testGetMacAddressFetchesMacAddress(self):
+        """
+        Verifies MAC address retrieved by comparing it against a pre-defined mock MAC address.
+        """
         addresses = mockNicAddresses()
 
         testMockAddress = getMacAddress(addresses)
         self.assertEqual(mockMacAddress, testMockAddress)
 
     def testGetMacAddressRaisesExceptionIfNoMacAddressFound(self):
+        """
+        Verifies that the `getMacAddress` function raises a `DataCollectionException`
+        when no valid MAC address is found in the provided network interface
+        address mappings.
+        """
         addresses = mockNicAddresses(int1="invalid", int2="invalid")
         with self.assertRaises(DataCollectionException):
             getMacAddress(addresses)
 
     def testGetProcessorModelRaisesExceptionIfInvalidOperatingSystem(self):
+        """
+        Tests the `getProcessorModel` function to ensure that it raises the
+        `UnsupportedOperatingSystemException` when provided with an invalid
+        operating system.
+        """
         with self.assertRaises(UnsupportedOperatingSystemException):
             getProcessorModel("Invalid")
 
     def testGetActivePortsReturnsActivePorts(self):
+        """
+        Verifies that the function `getActivePorts` correctly identifies and returns the active
+        ports from the provided socket connections.
+        """
         activePorts = {"443", "5173"}
         testActivePorts = getActivePorts(mockSConns())
         testActivePortsSet = set(testActivePorts.split(", "))
@@ -33,6 +50,11 @@ class ProjectTest(unittest.TestCase):
 
     @patch("main.speedtest.Speedtest")
     def testCollectDataCreatesDictionaryWithExpectedKeys(self, mockSpeedtest):
+        """
+        Tests that the collectData function correctly creates a dictionary containing
+        the expected keys. This verifies that all necessary system and network
+        information has been captured.
+        """
         # mock speedtest call
         mockSpeedtestObject = MagicMock()
         mockSpeedtestObject.download.return_value = 10000000
@@ -56,6 +78,9 @@ class ProjectTest(unittest.TestCase):
             self.assertIn(key, deviceInfoKeys)
 
     def testWriteToCSVCreatesCSV(self):
+        """
+        Tests if the `writeToCSV` function successfully creates a CSV file.
+        """
         filePath = tempFile("test_file1")
         writeToCSV(mockData(), filePath)
 
@@ -64,6 +89,10 @@ class ProjectTest(unittest.TestCase):
         os.remove(filePath)
 
     def testWriteToCSVWritesDataToCSV(self):
+        """
+        Test case to ensure that the `writeToCSV` function writes the mock data
+        to a CSV file correctly.
+        """
         filePath = tempFile("test_file2")
         writeToCSV(mockData(), filePath)
         expectedKeys = mockData().keys()
@@ -82,6 +111,10 @@ class ProjectTest(unittest.TestCase):
         os.remove(filePath)
 
     def testWriteToCSVShouldNotDuplicateRecord(self):
+        """
+        Tests that the `writeToCSV` function writes a record to a CSV file only once
+        and does not duplicate the record upon repeated calls with the same data.
+        """
         filePath = tempFile("test_file3")
 
         writeToCSV(mockData(), filePath)
@@ -98,6 +131,10 @@ class ProjectTest(unittest.TestCase):
         os.remove(filePath)
 
     def testWriteToCSVShouldUpdateExistingRecordWithNewData(self):
+        """
+        Tests the functionality of the `writeToCSV` function to ensure that it correctly updates an
+        existing record in the CSV file with new data while maintaining data consistency.
+        """
         filePath = tempFile("test_file4")
 
         writeToCSV(mockData(), filePath)
