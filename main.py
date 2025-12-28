@@ -11,7 +11,7 @@ from pathlib import Path
 from exeptions import UnsupportedOperatingSystemException, DataCollectionException, DuplicateDataException
 
 
-def getMacAddress():
+def getMacAddress(address):
     """
     Gets the MAC address of a network interface.
 
@@ -21,16 +21,16 @@ def getMacAddress():
     :rtype: str
     """
     macAddress = None
-    address = psutil.net_if_addrs()
     prefixes = ["eth", "en", "wlan", "wl", "l"]  # common network interface prefixes
 
     # Go through each address and look for one with an interface that matches the prefixes
     # and family that matches the constant psutil.AF_LINK to get the hardware address
     for interface, addressesList in address.items():
-        if any([prefix in interface.lower() for prefix in prefixes]):
+        if any([interface.lower().startswith(prefix) for prefix in prefixes]):
             for address in addressesList:
                 if address.family == psutil.AF_LINK:
                     macAddress = address.address
+            break
     if macAddress is None:
         raise DataCollectionException("No MAC address found.")
     else:
@@ -61,7 +61,7 @@ def getProcessorModel(operatingSystem):
             raise UnsupportedOperatingSystemException
 
 
-def getActivePorts():
+def getActivePorts(connections):
     """
     Extracts and retrieves a list of active network ports currently in the 'LISTEN' state.
 
@@ -69,7 +69,7 @@ def getActivePorts():
         'LISTEN' state.
     :rtype: str
     """
-    activeConnections = [connection for connection in psutil.net_connections() if connection.status == 'LISTEN']
+    activeConnections = [connection for connection in connections if connection.status == 'LISTEN']
     activePorts = {str(activeConnection.laddr.port) for activeConnection in activeConnections}
     return ", ".join(activePorts)
 
@@ -122,7 +122,7 @@ def collectData():
         deviceInfo["processor_model"] = getProcessorModel(operatingSystem)
 
         print("Getting mac address...")
-        deviceInfo["mac_address"] = getMacAddress()
+        deviceInfo["mac_address"] = getMacAddress(psutil.net_if_addrs())
 
         print("Getting computer name...")
         computerName = socket.gethostname()
@@ -133,7 +133,7 @@ def collectData():
         print("Getting system time...")
         deviceInfo["system_time"] = datetime.datetime.now().strftime("%H:%M:%S")
         print("Getting all active ports...")
-        deviceInfo["active_ports"] = getActivePorts()
+        deviceInfo["active_ports"] = getActivePorts(psutil.net_connections())
 
         print("Getting internet download and upload speed...")
         deviceInfo["internet_speed"] = getInternetSpeed()
@@ -210,13 +210,13 @@ def writeToCSV(deviceInfo, filePath):
         print(f"Writing to CSV file failed due to unexpected reason: {e}")
 
 
-if __name__ == '__main__':
-    multiprocessing.freeze_support()
-    while True:
-        filePath = input("Please enter the csv file path: \n").strip()
-        if filePath:  # check if the user has entered an empty string
-            deviceInfo = collectData()
-            writeToCSV(deviceInfo, filePath)
-            break
-        else:
-            print("Invalid file path. Please try again.")
+# if __name__ == '__main__':
+#     multiprocessing.freeze_support()
+#     while True:
+#         filePath = input("Please enter the csv file path: \n").strip()
+#         if filePath:  # check if the user has entered an empty string
+#             deviceInfo = collectData()
+#             writeToCSV(deviceInfo, filePath)
+#             break
+#         else:
+#             print("Invalid file path. Please try again.")
