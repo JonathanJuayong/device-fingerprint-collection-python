@@ -210,13 +210,13 @@ def writeToCSV(deviceInfo, filePath):
         print(f"Writing to CSV file failed due to unexpected reason: {e}")
 
 
-# if __name__ == '__main__':
-#     multiprocessing.freeze_support()
-#     while True:
-#         filePath = input("Please enter the csv file path: \n").strip()
-#         if filePath:  # check if the user has entered an empty string
-#             deviceInfo = collectData()
-#             writeToCSV(deviceInfo, filePath)
-#             break
-#         else:
-#             print("Invalid file path. Please try again.")
+if __name__ == '__main__':
+    multiprocessing.freeze_support()
+    while True:
+        filePath = input("Please enter the csv file path: \n").strip()
+        if filePath:  # check if the user has entered an empty string
+            deviceInfo = collectData()
+            writeToCSV(deviceInfo, filePath)
+            break
+        else:
+            print("Invalid file path. Please try again.")
