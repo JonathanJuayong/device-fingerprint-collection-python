@@ -210,7 +210,7 @@ def writeToCSV(deviceInfo, filePath):
         print(f"Writing to CSV file failed due to unexpected reason: {e}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     multiprocessing.freeze_support()
     while True:
         filePath = input("Please enter the csv file path: \n").strip()
